@@ -38,9 +38,9 @@ int main(int argc, char **argv) {
   for(int t = 0; t < T; t++) {
     x = 0.5*x + 25*x/(1 + x*x) + 8*cos(1.2*t) + normal_process(generator);
     z = x*x/20 + normal_meas(generator);
-    sum = 0;
+    sum = 0.0f;
     for(int i = 0; i < N; i++) {
-      x_p_update[i] = 0.5*x_p[i] + 25*x_p[i]/(1+x_p[i]*x_p[i]) + 8*cos(1.2*t) * normal_process(generator);
+      x_p_update[i] = 0.5*x_p[i] + 25*x_p[i]/(1+x_p[i]*x_p[i]) + 8*cos(1.2*t) + normal_process(generator);
       z_update[i] = x_p_update[i]*x_p_update[i]/20;
       p_w[i] = (1/sqrt(2*M_PI*x_R)) * exp(-1*pow(z - z_update[i],2)/(2*x_R));
       sum = sum + p_w[i];
@@ -49,14 +49,13 @@ int main(int argc, char **argv) {
       p_w[i] = p_w[i]/sum;
     }
     std::partial_sum(p_w, p_w+N, cumsum);
-    sum = 0;
+    sum = 0.0f;
     for(int i = 0; i < N; i++) {
       float uniform = uniform_resamp(generator);
       for(int j = 0; j < N; j++) {
-        if(uniform < cumsum[j]) {
+        if(uniform <= cumsum[j]) {
           x_p[i] = x_p_update[j];
           sum = sum + x_p[i];
-          //printf("found value %4.4f, %4.4f\n",uniform,cumsum[j]);
           break;
         }
       }
